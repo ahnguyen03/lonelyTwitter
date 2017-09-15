@@ -1,5 +1,6 @@
 package ca.ualberta.cs.lonelytwitter;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -8,10 +9,10 @@ import java.util.List;
  */
 
 public class ImportantTweet extends Tweet {
-    public ImportantTweet(String message, List<Mood> ArrayMood){
+    public ImportantTweet(String message, ArrayList<Mood> ArrayMood){
         super(message,ArrayMood);
     }
-    public ImportantTweet(String message, Date date,List<Mood> ArrayMood){
+    public ImportantTweet(String message, Date date,ArrayList<Mood> ArrayMood){
         super(message,date,ArrayMood);
     }
 

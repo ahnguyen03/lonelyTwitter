@@ -10,7 +10,7 @@ import java.util.List;
 
 public class NormalTweet extends Tweet{
 
-    public NormalTweet(String message,List<Mood> ArrayMood) {
+    public NormalTweet(String message,ArrayList<Mood> ArrayMood) {
         super(message,ArrayMood);
     }
 
