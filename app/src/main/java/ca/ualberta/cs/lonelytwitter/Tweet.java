@@ -1,36 +1,48 @@
 package ca.ualberta.cs.lonelytwitter;
 
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-
-/**
- * Created by cuongng on 2017-09-13.
- */
+import io.searchbox.annotations.JestId;
 
 public abstract class Tweet implements Tweetable {
-    private List<Mood> ArrayMood;
     private String message;
     private Date date;
+    @JestId
+    private String id;
 
-    public Tweet(String message, ArrayList<Mood> ArrayMood){
-        date = new Date();
+    public String getId() { return  id; }
+    public void setId(String id) { this.id = id; }
+
+    public Tweet(String message){
         this.message = message;
-        this.ArrayMood = ArrayMood;
+        this.date = new Date();
     }
-    public Tweet(String message,Date date,ArrayList<Mood> ArrayMood){
+
+    public Tweet(String message, Date date){
+        this.message = message;
         this.date = date;
-        this.message = message;
-        this.ArrayMood = ArrayMood;
-    }
-    public List<Mood> getArrayMood(){
-        return ArrayMood;
     }
 
-    public void currentmood(ArrayList<Mood> ArrayMood){
-        this.ArrayMood = ArrayMood;
+    @Override
+    public String toString(){
+        return message;
     }
-    public String getMessage(){
+
+    public abstract Boolean isImportant();
+
+
+    public void setMessage(String message) throws TweetTooLongException {
+        if (message.length() > 140){
+            //Do Something!
+            throw new TweetTooLongException();
+        }
+        this.message = message;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
+    }
+
+    public String getMessage() {
         return message;
     }
 
@@ -38,20 +50,5 @@ public abstract class Tweet implements Tweetable {
         return date;
     }
 
-    public void setMessage(String message) throws TweetTooLongException{
-        if(message.length() < 140)
-        {
-            this.message = message;
-        }
-        else
-        {
-        throw new TweetTooLongException();
-
-        }
-
-    }
-    public abstract Boolean isImportant();
-
-
-
+    public abstract boolean contains(Tweet tweet);
 }

@@ -6,7 +6,6 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -14,26 +13,30 @@ import java.util.Date;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 
 public class LonelyTwitterActivity extends Activity {
 
 	private static final String FILENAME = "file.sav";
 	private EditText bodyText;
 	private ListView oldTweetsList;
+	private ArrayList<NormalTweet> tweetList = new ArrayList<NormalTweet>();
+	private ArrayAdapter<NormalTweet> adapter;
 
-	private ArrayList<Tweet> tweets = new ArrayList<Tweet>();
-	private ArrayAdapter<Tweet> adapter;
-	/** Called when the activity is first created. */
+
+
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -41,105 +44,91 @@ public class LonelyTwitterActivity extends Activity {
 
 		bodyText = (EditText) findViewById(R.id.body);
 		Button saveButton = (Button) findViewById(R.id.save);
+		Button clearButton = (Button) findViewById(R.id.clear);
 		oldTweetsList = (ListView) findViewById(R.id.oldTweetsList);
 
-		Button clearButton = (Button)findViewById(R.id.clear);
-
 		saveButton.setOnClickListener(new View.OnClickListener() {
+
 			public void onClick(View v) {
 				setResult(RESULT_OK);
 				String text = bodyText.getText().toString();
-
-				tweets.add(new NormalTweet(text));
+                NormalTweet newTweet = new NormalTweet(text);
+				tweetList.add(newTweet);
 				adapter.notifyDataSetChanged();
-                saveInFile();
-
-				/*
-				saveInFile(text, new Date(System.currentTimeMillis()));
-
-				Tweet tweet =  new importantTweet("");
-				Tweet tweet1 = new NormalTweet("Hi");
-				try {
-					tweet.setMessage("Hello");
-				} catch (TweetTooLongException e) {
-					//e.printStackTrace();
-				}
-				Tweetable tweet3 = new importantTweet("");
-				ArrayList<Tweet> tweetList = new ArrayList<Tweet>();
-				tweetList.add(tweet);
-				tweetList.add(tweet1);
-				*/
-				//Log.d("","The isImportant method returns " + tweet.isImportant());
-				//Log.d("","The isImportant method returns " + tweet1.isImportant());
-				//	finish();
-
+				//saveInFile(); // TODO replace this with elastic search
+                ElasticsearchTweetController.AddTweetsTask addTweetsTask
+                        = new ElasticsearchTweetController.AddTweetsTask();
+                addTweetsTask.execute(newTweet);
 			}
-
 		});
 
 		clearButton.setOnClickListener(new View.OnClickListener() {
+
 			public void onClick(View v) {
 				setResult(RESULT_OK);
-				tweets.clear();
+				tweetList.clear();
+				deleteFile(FILENAME);  // TODO deprecate this button
 				adapter.notifyDataSetChanged();
-				saveInFile();
 			}
 		});
+
+
 	}
 
 	@Override
 	protected void onStart() {
 		// TODO Auto-generated method stub
 		super.onStart();
-        loadFromFile();
-		//String[] tweets = loadFromFile();
-		adapter = new ArrayAdapter<Tweet>(this,
-				R.layout.list_item, tweets);
+		//loadFromFile(); // TODO replace this with elastic search
+        ElasticsearchTweetController.GetTweetsTask getTweetsTask
+                = new ElasticsearchTweetController.GetTweetsTask();
+        getTweetsTask.execute("");
+
+        try {
+            tweetList = getTweetsTask.get();
+        }
+        catch (Exception e)
+        {
+            Log.i("Error","Failed to get the tweets from the async object");
+        }
+		adapter = new ArrayAdapter<NormalTweet>(this,
+				R.layout.list_item, tweetList);
 		oldTweetsList.setAdapter(adapter);
 	}
 
+
 	private void loadFromFile() {
-		//ArrayList<String> tweets = new ArrayList<String>();
 		try {
 			FileInputStream fis = openFileInput(FILENAME);
 			BufferedReader in = new BufferedReader(new InputStreamReader(fis));
-            Gson gson = new Gson();
-            Type listType = new TypeToken<ArrayList<NormalTweet>>() {}.getType();
-            tweets = gson.fromJson(in,listType);
-
-
-
+			Gson gson = new Gson();
+			//Code taken from http://stackoverflow.com/questions/12384064/gson-convert-from-json-to-a-typed-arraylistt Sept.22,2016
+			Type listType = new TypeToken<ArrayList<NormalTweet>>(){}.getType();
+			tweetList = gson.fromJson(in, listType);
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
-            tweets = new ArrayList<Tweet>();
-
-            // e.printStackTrace();
+			tweetList = new ArrayList<NormalTweet>();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-			throw new RuntimeException(e);
-            //e.printStackTrace();
+			throw new RuntimeException();
 		}
-
 	}
+
 
 	private void saveInFile() {
 		try {
-			FileOutputStream fos = openFileOutput(FILENAME,
-					Context.MODE_PRIVATE);
-            OutputStreamWriter writer = new OutputStreamWriter(fos);
-            Gson gson = new Gson();
-            gson.toJson(tweets,writer);
-            writer.flush();
 
-			fos.close();
+			FileOutputStream fos = openFileOutput(FILENAME,0);
+			OutputStreamWriter writer = new OutputStreamWriter(fos);
+			Gson gson = new Gson();
+			gson.toJson(tweetList, writer);
+			writer.flush();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			throw new RuntimeException();
-            //e.printStackTrace();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
-            throw new RuntimeException();
-			//e.printStackTrace();
+			throw new RuntimeException();
 		}
 	}
 }
