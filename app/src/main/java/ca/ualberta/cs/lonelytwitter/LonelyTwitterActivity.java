@@ -25,7 +25,8 @@ import java.util.ArrayList;
 
 public class LonelyTwitterActivity extends Activity {
 
-	private LonelyTwitterActivity activity = this;
+	private final LonelyTwitterActivity activity = this;
+	//Refactor #3 added a Final modifer as its more better to have for the FILENAMEss
 	private static final String FILENAME = "file.sav";
 	private EditText bodyText;
 	private ListView oldTweetsList;
