@@ -5,8 +5,8 @@ import android.test.ActivityInstrumentationTestCase2;
 import android.widget.EditText;
 
 import com.robotium.solo.Solo;
-
-import junit.framework.TestCase;
+//Refactor # 1
+// Remove the import juit.framework.TestCase reason is that this is a redundant import statment so its pointless to have
 
 public class LonelyTwitterActivityTest extends ActivityInstrumentationTestCase2<LonelyTwitterActivity> {
     private Solo solo;
