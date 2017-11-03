@@ -1,16 +1,10 @@
 package ca.ualberta.cs.lonelytwitter;
 
 import java.util.Date;
-import io.searchbox.annotations.JestId;
 
 public abstract class Tweet implements Tweetable {
     private String message;
     private Date date;
-    @JestId
-    private String id;
-
-    public String getId() { return  id; }
-    public void setId(String id) { this.id = id; }
 
     public Tweet(String message){
         this.message = message;
@@ -27,7 +21,8 @@ public abstract class Tweet implements Tweetable {
         return message;
     }
 
-    public abstract Boolean isImportant();
+    //Refactor #4 Removed abstract boolean isimportant since its unused so its useless to have
+    //public abstract Boolean isImportant();
 
 
     public void setMessage(String message) throws TweetTooLongException {
@@ -37,10 +32,10 @@ public abstract class Tweet implements Tweetable {
         }
         this.message = message;
     }
-
-    public void setDate(Date date) {
-        this.date = date;
-    }
+    //Refactor #5 removed unused methods as its useless to have
+   // public void setDate(Date date) {
+    //    this.date = date;
+   // }
 
     public String getMessage() {
         return message;
@@ -49,6 +44,4 @@ public abstract class Tweet implements Tweetable {
     public Date getDate() {
         return date;
     }
-
-    public abstract boolean contains(Tweet tweet);
 }
